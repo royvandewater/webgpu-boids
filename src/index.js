@@ -51,13 +51,13 @@ async function main() {
   assert(device, new Error("Failed to get WebGPU device"));
   const canvas = document.querySelector("canvas");
 
-  let { boidsIn, boidsOut, verticesIn, verticesOut } = await generate({
+  let { boidsIn, boidsOut, vertices } = await generate({
     device,
     numBoids,
   });
 
   const fpsTracker = new FpsTracker();
-  // const compute = await buildCompute({ device, numBoids });
+  const compute = await buildCompute({ device, numBoids });
   const render = await buildRender({ canvas, device, numBoids });
 
   const camera = {
@@ -69,16 +69,15 @@ async function main() {
   });
 
   registerPan(document.querySelector("canvas#boids"), ({ dx, dy }) => {
-    const scale = Math.sqrt(width * height) * 0.001;
+    const scale = 0.001;
     camera.position.x += (dx * scale) / camera.zoom;
     camera.position.y += (dy * scale) / camera.zoom;
   });
 
   const frame = async () => {
-    // await compute({ boidsIn, boidsOut, verticesIn, verticesOut });
-    await render({ boids: boidsOut, camera, vertices: verticesOut });
+    await compute({ boidsIn, boidsOut, vertices });
+    await render({ boids: boidsOut, camera, vertices });
     [boidsIn, boidsOut] = [boidsOut, boidsIn];
-    [verticesIn, verticesOut] = [verticesOut, verticesIn];
     fpsTracker.update();
     document.getElementById("fps").textContent = `${fpsTracker.fps} fps`;
     requestAnimationFrame(frame);

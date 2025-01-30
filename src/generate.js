@@ -32,28 +32,21 @@ export async function generate({ device, numBoids, seed }) {
   });
   device.queue.writeBuffer(boidsBuffer, 0, boids);
 
-  // 3 vertices per boid, 3 floats per vertex. The first vector is the position, the second is the velocity.
-  const vertices = new Float32Array(numBoids * 3 * 3).fill(0);
-  const verticesIn = device.createBuffer({
+  const vertices = device.createBuffer({
     label: "vertices buffer",
-    size: vertices.byteLength,
+    // 3 vertices per boid, 3 floats per vertex. The first vector is the position, the second is the velocity.
+    size: new Float32Array(numBoids * 3 * 3).fill(0).byteLength,
     usage:
       GPUBufferUsage.VERTEX |
       GPUBufferUsage.STORAGE |
       GPUBufferUsage.COPY_SRC |
       GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(verticesIn, 0, vertices);
-  const verticesOut = device.createBuffer({
-    label: "vertices buffer 2",
-    size: vertices.byteLength,
-    usage:
-      GPUBufferUsage.VERTEX |
-      GPUBufferUsage.STORAGE |
-      GPUBufferUsage.COPY_SRC |
-      GPUBufferUsage.COPY_DST,
-  });
-  device.queue.writeBuffer(verticesOut, 0, vertices);
+  device.queue.writeBuffer(
+    vertices,
+    0,
+    new Float32Array(numBoids * 3 * 3).fill(0)
+  );
 
   // This is the back buffer for double buffering
   const backBuffer = device.createBuffer({
@@ -78,7 +71,6 @@ export async function generate({ device, numBoids, seed }) {
   pass.dispatchWorkgroups(numBoids);
   pass.end();
   encoder.copyBufferToBuffer(boidsBuffer, 0, backBuffer, 0, backBuffer.size);
-  encoder.copyBufferToBuffer(verticesIn, 0, verticesOut, 0, verticesOut.size);
   const commandBuffer = encoder.finish();
   device.queue.submit([commandBuffer]);
   await device.queue.onSubmittedWorkDone();
@@ -86,7 +78,6 @@ export async function generate({ device, numBoids, seed }) {
   return {
     boidsIn: boidsBuffer,
     boidsOut: backBuffer,
-    verticesIn,
-    verticesOut,
+    vertices,
   };
 }

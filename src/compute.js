@@ -1,9 +1,9 @@
 import { resolveShader } from "./resolveShader.js";
 
 /**
- * @param {{device: GPUDevice, width: number, height: number}} options
+ * @param {{device: GPUDevice, numBoids: number}} options
  */
-export const buildCompute = async ({ device, grid, width, height }) => {
+export const buildCompute = async ({ device, numBoids }) => {
   const module = await device.createShaderModule({
     label: "compute module",
     code: await resolveShader("src/shaders/compute.wgsl"),
@@ -18,25 +18,17 @@ export const buildCompute = async ({ device, grid, width, height }) => {
     },
   });
 
-  const gridDimensions = Uint32Array.from([width, height]);
-  const gridDimensionsBuffer = device.createBuffer({
-    label: "dimensions buffer",
-    size: gridDimensions.byteLength,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
-  device.queue.writeBuffer(gridDimensionsBuffer, 0, gridDimensions);
-
   /**
-   * @param {{grid: GPUBuffer}} options
+   * @param {{boidsIn: GPUBuffer, boidsOut: GPUBuffer, vertices: GPUBuffer}} options
    */
-  const compute = async ({ gridIn, gridOut }) => {
+  const compute = async ({ boidsIn, boidsOut, vertices }) => {
     const bindGroup = device.createBindGroup({
       label: "bind group",
       layout: pipeline.getBindGroupLayout(0),
       entries: [
-        { binding: 0, resource: { buffer: gridDimensionsBuffer } },
-        { binding: 1, resource: { buffer: gridIn } },
-        { binding: 2, resource: { buffer: gridOut } },
+        { binding: 0, resource: { buffer: boidsIn } },
+        { binding: 1, resource: { buffer: boidsOut } },
+        { binding: 2, resource: { buffer: vertices } },
       ],
     });
 
@@ -44,7 +36,7 @@ export const buildCompute = async ({ device, grid, width, height }) => {
     const pass = encoder.beginComputePass({ label: "compute pass" });
     pass.setPipeline(pipeline);
     pass.setBindGroup(0, bindGroup);
-    pass.dispatchWorkgroups(width, height);
+    pass.dispatchWorkgroups(numBoids);
     pass.end();
     device.queue.submit([encoder.finish()]);
     await device.queue.onSubmittedWorkDone();
