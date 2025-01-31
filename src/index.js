@@ -3,7 +3,7 @@ import { buildCompute } from "./compute.js";
 import { buildRender } from "./render.js";
 import { generate } from "./generate.js";
 import { FpsTracker } from "./fpsTracker.js";
-
+import { readBoidsBuffer } from "./readGpuBuffer.js";
 import { registerPinchZoom } from "./registerPinchZoom.js";
 import { registerPan } from "./registerPan.js";
 
@@ -15,7 +15,8 @@ async function main() {
 
   const searchParams = new URLSearchParams(window.location.search);
 
-  const numBoids = searchParams.get("numBoids") ?? 100;
+  const numBoids = searchParams.get("numBoids") ?? 3;
+  const seed = searchParams.get("seed") ?? 0;
 
   const adapter = await navigator.gpu.requestAdapter();
 
@@ -54,7 +55,11 @@ async function main() {
   let { boidsIn, boidsOut, vertices } = await generate({
     device,
     numBoids,
+    seed,
   });
+
+  const boidsArray = await readBoidsBuffer({ device, buffer: boidsIn });
+  console.log("boidsArray", JSON.stringify(boidsArray, null, 2));
 
   const fpsTracker = new FpsTracker();
   const compute = await buildCompute({ device, numBoids });

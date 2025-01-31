@@ -6,13 +6,22 @@
   let i = id.x * 2;
   let seed = u32(boids[i].x);
 
-  let val = hashCell(i, seed);
+  let val = 0.5; // hashCell(i, seed);
+  let val2 = 1.0;
 
-  boids[i] = vec3f(val, val, val);
-  boids[i + 1] = vec3f(val, val, val);
+  let px = 0.1;
+  let py = 0.2;
+  let pz = 0.3;
+
+  let vx = 0.4;
+  let vy = 0.5;
+  let vz = 0.6;
+
+  boids[i] = vec3f(px, py, pz);
+  boids[i + 1] = vec3f(vx, vy, vz);
 }
 
-// A hash function to generate a pseudo-random value between 0 and 1
+// A hash function to generate a pseudo-random value between -1 and 1
 fn hashCell(i: u32, seed: u32) -> f32 {
   // Combine i and seed into a single integer
   let input = i + seed;
@@ -26,5 +35,6 @@ fn hashCell(i: u32, seed: u32) -> f32 {
   // Map the hashed value to [0, 1]
   let normalized = f32(hashed & 0x7FFFFFFF) / f32(0x7FFFFFFF);
 
-  return normalized;
+  // Map the normalized value to [-1, 1]
+  return normalized * 2 - 1;
 }
