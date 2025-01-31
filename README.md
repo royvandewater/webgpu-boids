@@ -6,7 +6,7 @@ WebGPU implementation of Boids algorithm
 
 - [x] Render each "boid" as a triangle
 - [x] Rotate boid triangles to face the direction they are moving
-- [ ] Apply velocity to boids on every frame
+- [x] Apply velocity to boids on every frame
 - [ ] Have walls at -1, 1 that reflect boids
 - [ ] Render walls?
 - [ ] Apply separation, alignment, and cohesion to boids on every frame (in 2D)

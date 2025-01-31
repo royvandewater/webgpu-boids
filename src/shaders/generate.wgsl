@@ -11,8 +11,9 @@
   let px = hashCell(i, seed);
   let py = hashCell(i, seed + i);
 
-  let vx = hashCell(i, seed + i * 2);
-  let vy = hashCell(i, seed + i * 3);
+  let scale = 0.01;
+  let vx = hashCell(i, seed + i * 2) * scale;
+  let vy = hashCell(i, seed + i * 3) * scale;
 
   boids[i] = Boid(
     // the vertex shader requires the w value to be 1.0 for some reason

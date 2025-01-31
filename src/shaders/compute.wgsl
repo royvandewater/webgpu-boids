@@ -9,17 +9,17 @@
     @builtin(global_invocation_id) id: vec3u
 ) {
   let boid = boidsIn[id.x];
-  boidsOut[id.x] = boid;
 
   let vi = id.x * 3;
 
   let position = boid.position;
   let velocity = boid.velocity;
+  boidsOut[id.x] = Boid(position + velocity, velocity);
 
   let triangle: array<vec2f, 3> = array<vec2f, 3>(
-    vec2f(0.0, 0.1),
+    vec2f(0.1, 0.0),
+    vec2f(-0.1, 0.1),
     vec2f(-0.1, -0.1),
-    vec2f(0.1, -0.1),
   );
 
   vertices[vi + 0] = position + rotate(triangle[0], velocity.xy);
