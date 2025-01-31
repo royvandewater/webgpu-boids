@@ -5,6 +5,7 @@ import { generate } from "./generate.js";
 import { FpsTracker } from "./fpsTracker.js";
 import { registerPinchZoom } from "./registerPinchZoom.js";
 import { registerPan } from "./registerPan.js";
+import { readBoidsBuffer, readVec4fBuffer } from "./readGpuBuffer.js";
 
 async function main() {
   assert(
@@ -79,6 +80,7 @@ async function main() {
     await compute({ boidsIn, boidsOut, vertices });
     await render({ boids: boidsOut, camera, vertices });
     [boidsIn, boidsOut] = [boidsOut, boidsIn];
+
     fpsTracker.update();
     document.getElementById("fps").textContent = `${fpsTracker.fps} fps`;
     requestAnimationFrame(frame);

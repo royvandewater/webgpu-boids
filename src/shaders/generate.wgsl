@@ -1,7 +1,4 @@
-struct Boid {
-  position: vec4f,
-  velocity: vec4f,
-}
+// @include "./boid.wgsl"
 
 @group(0) @binding(0) var<storage, read_write> boids: array<Boid>;
 
@@ -10,9 +7,14 @@ struct Boid {
 ) {
   let i = id.x;
   let seed = u32(boids[i].position.x);
-  let v = hashCell(i, seed);
 
-  boids[i] = Boid(vec4f(v, v, v, 0.0), vec4f(v, v, v, 0.0));
+  let px = hashCell(i, seed);
+  let py = hashCell(i, seed + i);
+
+  let vx = hashCell(i, seed + i * 2);
+  let vy = hashCell(i, seed + i * 3);
+
+  boids[i] = Boid(vec4f(px, py, 0.0, 0.0), vec4f(vx, vy, 0.0, 0.0));
 }
 
 // A hash function to generate a pseudo-random value between -1 and 1
@@ -30,5 +32,5 @@ fn hashCell(i: u32, seed: u32) -> f32 {
   let normalized = f32(hashed & 0x7FFFFFFF) / f32(0x7FFFFFFF);
 
   // Map the normalized value to [-1, 1]
-  return normalized * 2 - 1;
+  return (normalized - 0.5) * 2;
 }

@@ -20,7 +20,7 @@ export async function generate({ device, numBoids, seed }) {
     },
   });
 
-  // 2 vectors per boid, 4 floats per vertex (we only use 3, but WGSL requires us to map memory in powers of 2).
+  // 2 vectors per boid, 4 floats per vector (we only use 3, but WGSL requires us to map memory in powers of 2).
   // The first vector is the position, the second is the velocity.
   const boids = new Float32Array(numBoids * 4 * 2).fill(seed);
   const boidsBuffer = device.createBuffer({
@@ -33,21 +33,19 @@ export async function generate({ device, numBoids, seed }) {
   });
   device.queue.writeBuffer(boidsBuffer, 0, boids);
 
-  const vertices = device.createBuffer({
+  // 3 vertices per boid, 4 floats per vertex. The first vector is the position, the second is the velocity.
+  // the vectors are all vec4f even though we only use 3 floats. WGSL requires us to map memory in powers of 2.
+  let vertices = new Float32Array(numBoids * 3 * 4).fill(0);
+  const verticesBuffer = device.createBuffer({
     label: "vertices buffer",
-    // 3 vertices per boid, 3 floats per vertex. The first vector is the position, the second is the velocity.
-    size: new Float32Array(numBoids * 3 * 3).fill(0).byteLength,
+    size: vertices.byteLength,
     usage:
       GPUBufferUsage.VERTEX |
       GPUBufferUsage.STORAGE |
       GPUBufferUsage.COPY_SRC |
       GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(
-    vertices,
-    0,
-    new Float32Array(numBoids * 3 * 3).fill(0)
-  );
+  device.queue.writeBuffer(verticesBuffer, 0, vertices);
 
   // This is the back buffer for double buffering
   const backBuffer = device.createBuffer({
@@ -79,6 +77,6 @@ export async function generate({ device, numBoids, seed }) {
   return {
     boidsIn: boidsBuffer,
     boidsOut: backBuffer,
-    vertices,
+    vertices: verticesBuffer,
   };
 }
