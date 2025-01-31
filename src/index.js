@@ -16,7 +16,7 @@ async function main() {
   const searchParams = new URLSearchParams(window.location.search);
 
   const numBoids = searchParams.get("numBoids") ?? 3;
-  const seed = searchParams.get("seed") ?? 0;
+  const seed = searchParams.get("seed") ?? Math.floor(Math.random() * 1000000);
 
   const adapter = await navigator.gpu.requestAdapter();
 

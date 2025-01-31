@@ -14,14 +14,26 @@
   let vi = id.x * 3;
 
   let position = boid.position;
+  let velocity = boid.velocity;
 
-  let triangle: array<vec4f, 3> = array<vec4f, 3>(
-    vec4f(0.0, 0.1, 0.0, 1.0), // the w values have to be 1.0 for some reason
-    vec4f(-0.1, -0.1, 0.0, 1.0),
-    vec4f(0.1, -0.1, 0.0, 1.0),
+  let triangle: array<vec2f, 3> = array<vec2f, 3>(
+    vec2f(0.0, 0.1),
+    vec2f(-0.1, -0.1),
+    vec2f(0.1, -0.1),
   );
 
-  vertices[vi + 0] = position + triangle[0];
-  vertices[vi + 1] = position + triangle[1];
-  vertices[vi + 2] = position + triangle[2];
+  vertices[vi + 0] = position + rotate(triangle[0], velocity.xy);
+  vertices[vi + 1] = position + rotate(triangle[1], velocity.xy);
+  vertices[vi + 2] = position + rotate(triangle[2], velocity.xy);
+}
+
+fn rotate(vertex: vec2f, vRotation: vec2f) -> vec4f {
+  let uRotation = normalize(vRotation);
+
+  let rotated = vec2f(
+    vertex.x * uRotation.x - vertex.y * uRotation.y, 
+    vertex.x * uRotation.y + vertex.y * uRotation.x,
+  );
+
+  return vec4f(rotated.x, rotated.y, 0.0, 0.0);
 }
