@@ -71,9 +71,9 @@ async function main() {
   });
 
   registerPan(document.querySelector("canvas#boids"), ({ dx, dy }) => {
-    const scale = 0.001;
-    camera.position.x += (dx * scale) / camera.zoom;
-    camera.position.y += (dy * scale) / camera.zoom;
+    const scale = 0.001 * Math.pow(camera.zoom, 1 / 100);
+    camera.position.x += dx * scale;
+    camera.position.y += dy * scale;
   });
 
   const frame = async () => {

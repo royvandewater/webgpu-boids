@@ -48,51 +48,34 @@ export const buildRender = async ({ canvas, device, numBoids }) => {
     ],
   };
 
-  // const screenDimensions = Float32Array.from([
-  //   0,
-  //   0,
-  //   canvas.width,
-  //   canvas.height,
-  // ]);
-  // const screenDimensionsBuffer = device.createBuffer({
-  //   label: "screen dimensions buffer",
-  //   size: screenDimensions.byteLength,
-  //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  // });
-  // device.queue.writeBuffer(screenDimensionsBuffer, 0, screenDimensions);
-
-  // const camera = Float32Array.from([0, 0, 1]);
-  // const cameraBuffer = device.createBuffer({
-  //   label: "camera buffer",
-  //   size: camera.byteLength,
-  //   usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  // });
-  // device.queue.writeBuffer(cameraBuffer, 0, camera);
-
-  autoResize(canvas, device, ({ width, height }) => {
-    // const screenDimensions = Float32Array.from([width, height]);
-    // device.queue.writeBuffer(screenDimensionsBuffer, 0, screenDimensions);
+  const camera = Float32Array.from([0, 0, 1]);
+  const cameraBuffer = device.createBuffer({
+    label: "camera buffer",
+    size: camera.byteLength,
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
+  device.queue.writeBuffer(cameraBuffer, 0, camera);
+
+  autoResize(canvas, device);
 
   /**
    * @param {{vertices: GPUBuffer, camera: {position: {x: number, y: number}, zoom: number}}} options
    */
   const renderLoop = async ({ camera, vertices }) => {
-    // const cameraArray = Float32Array.from([
-    //   camera.position.x,
-    //   camera.position.y,
-    //   camera.zoom,
-    // ]);
+    const cameraArray = Float32Array.from([
+      camera.position.x,
+      camera.position.y,
+      camera.zoom,
+    ]);
 
-    // device.queue.writeBuffer(cameraBuffer, 0, cameraArray);
+    device.queue.writeBuffer(cameraBuffer, 0, cameraArray);
 
     const bindGroup = device.createBindGroup({
       label: "render bind group",
       layout: pipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: { buffer: vertices } },
-        // { binding: 1, resource: { buffer: screenDimensionsBuffer } },
-        // { binding: 2, resource: { buffer: cameraBuffer } },
+        { binding: 1, resource: { buffer: cameraBuffer } },
       ],
     });
 
