@@ -3,7 +3,6 @@ import { buildCompute } from "./compute.js";
 import { buildRender } from "./render.js";
 import { generate } from "./generate.js";
 import { FpsTracker } from "./fpsTracker.js";
-import { readBoidsBuffer } from "./readGpuBuffer.js";
 import { registerPinchZoom } from "./registerPinchZoom.js";
 import { registerPan } from "./registerPan.js";
 
@@ -57,9 +56,6 @@ async function main() {
     numBoids,
     seed,
   });
-
-  const boidsArray = await readBoidsBuffer({ device, buffer: boidsIn });
-  console.log("boidsArray", JSON.stringify(boidsArray, null, 2));
 
   const fpsTracker = new FpsTracker();
   const compute = await buildCompute({ device, numBoids });

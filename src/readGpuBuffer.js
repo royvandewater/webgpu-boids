@@ -26,20 +26,21 @@ export const readFloat32Buffer = async ({ device, buffer }) => {
 /**
  * @param {{device: GPUDevice, buffer: GPUBuffer}} options
  */
-export const readVec3fBuffer = async ({ device, buffer }) => {
+export const readVec4fBuffer = async ({ device, buffer }) => {
   assert(
-    buffer.size % 12 === 0,
-    "Buffer must be divisible by 12 (3 values of 4 bytes)"
+    buffer.size % 16 === 0,
+    "Buffer must be divisible by 16 (4 values of 4 bytes)"
   );
   const resultBuffer = await readFloat32Buffer({ device, buffer });
 
   const result = [];
 
-  for (let i = 0; i < resultBuffer.length; i += 3) {
+  for (let i = 0; i < resultBuffer.length; i += 4) {
     result.push({
       x: resultBuffer[i],
       y: resultBuffer[i + 1],
       z: resultBuffer[i + 2],
+      w: resultBuffer[i + 3],
     });
   }
 
@@ -51,10 +52,10 @@ export const readVec3fBuffer = async ({ device, buffer }) => {
  */
 export const readBoidsBuffer = async ({ device, buffer }) => {
   assert(
-    buffer.size % 24 === 0,
-    "Buffer must be divisible by 24 (2 vectors of 12 bytes)"
+    buffer.size % 32 === 0,
+    "Buffer must be divisible by 32 (2 vectors of 16 bytes)"
   );
-  const vectors = await readVec3fBuffer({ device, buffer });
+  const vectors = await readVec4fBuffer({ device, buffer });
   const boids = [];
 
   for (let i = 0; i < vectors.length; i += 2) {

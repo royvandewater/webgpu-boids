@@ -20,8 +20,9 @@ export async function generate({ device, numBoids, seed }) {
     },
   });
 
-  // 2 vectors per boid, 3 floats per vertex. The first vector is the position, the second is the velocity.
-  const boids = new Float32Array(numBoids * 3 * 2).fill(seed);
+  // 2 vectors per boid, 4 floats per vertex (we only use 3, but WGSL requires us to map memory in powers of 2).
+  // The first vector is the position, the second is the velocity.
+  const boids = new Float32Array(numBoids * 4 * 2).fill(seed);
   const boidsBuffer = device.createBuffer({
     label: "boids buffer 1",
     size: boids.byteLength,

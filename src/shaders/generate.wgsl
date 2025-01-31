@@ -1,24 +1,18 @@
-@group(0) @binding(0) var<storage, read_write> boids: array<vec3f>;
+struct Boid {
+  position: vec4f,
+  velocity: vec4f,
+}
+
+@group(0) @binding(0) var<storage, read_write> boids: array<Boid>;
 
 @compute @workgroup_size(1) fn generate(
     @builtin(global_invocation_id) id: vec3u
 ) {
-  let i = id.x * 2;
-  let seed = u32(boids[i].x);
+  let i = id.x;
+  let seed = u32(boids[i].position.x);
+  let v = hashCell(i, seed);
 
-  let val = 0.5; // hashCell(i, seed);
-  let val2 = 1.0;
-
-  let px = 0.1;
-  let py = 0.2;
-  let pz = 0.3;
-
-  let vx = 0.4;
-  let vy = 0.5;
-  let vz = 0.6;
-
-  boids[i] = vec3f(px, py, pz);
-  boids[i + 1] = vec3f(vx, vy, vz);
+  boids[i] = Boid(vec4f(v, v, v, 0.0), vec4f(v, v, v, 0.0));
 }
 
 // A hash function to generate a pseudo-random value between -1 and 1
