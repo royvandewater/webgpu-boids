@@ -5,6 +5,8 @@
 @group(0) @binding(2) var<storage, read_write> vertices: array<vec4f>;
 // x: separation force strength, y: alignment force strength, z: cohesion force strength, w: speed
 @group(0) @binding(3) var<storage, read_write> forceStrengths: vec4f;
+// distance at which boids can see each other. a number between 0 and 1000.
+@group(0) @binding(4) var<storage, read_write> visionDistance: f32;
 
 // compute the new position and velocity of each boid. Also convert each boid's position & velocity to vertices
 @compute @workgroup_size(1) fn compute(
@@ -38,14 +40,21 @@ fn nextBoid(boid: Boid) -> Boid {
   velocity += alignmentForce(boid);
   velocity += cohesionForce(boid);
   velocity = reflect_off_wall(position, velocity);
-  velocity = normalize(velocity) * 0.0001 * forceStrengths.w; // enforce the speed;
+  velocity = enforceSpeed(velocity);
 
   return Boid(boid.id, position, velocity);
+}
+
+fn enforceSpeed(velocity: vec4f) -> vec4f {
+  let xy = normalize(velocity.xy) * 0.00001 * forceStrengths.w;
+  return vec4f(xy.x, xy.y, velocity.z, velocity.w);
 }
 
 fn separationForce(boid: Boid) -> vec4f {
   let position = boid.position;
   let numBoids = arrayLength(&boidsIn);
+
+  let visionDistance = visionDistance / 500.0;
 
   var separation = vec4f(0.0, 0.0, 0.0, 0.0);
   for (var i: u32 = 0; i < numBoids; i++) {
@@ -56,16 +65,27 @@ fn separationForce(boid: Boid) -> vec4f {
     }
 
     let difference = position - other.position;
-    let distance = length(difference) * 50000;
+    let distance = length(difference);
+
+    if (distance < 0.0001 || visionDistance < distance) {
+      continue;
+    }
+
     separation += normalize(difference) / distance;
   }
 
-  return separation * forceStrengths.x * 0.001;
+  if (isZero(separation)) {
+    return vec4f();
+  }
+
+  return normalize(separation) * forceStrengths.x;
 }
+
 
 fn alignmentForce(boid: Boid) -> vec4f {
   let position = boid.position;
   let numBoids = arrayLength(&boidsIn);
+  let visionDistance = visionDistance / 500.0;
 
   var alignment = vec4f(0.0, 0.0, 0.0, 0.0);
   for (var i: u32 = 0; i < numBoids; i++) {
@@ -75,18 +95,27 @@ fn alignmentForce(boid: Boid) -> vec4f {
       continue;
     }
 
-    let distance = length(position - other.position) * 500;
-    alignment += (other.velocity / distance);
+    let distance = length(position - other.position);
+    if (distance < 0.0001 || visionDistance < distance) {
+      continue;
+    }
+
+    alignment += normalize(other.velocity) / distance;
   }
 
-  return alignment * forceStrengths.y * 0.01;
+  if (isZero(alignment)) {
+    return vec4f();
+  }
+
+  return normalize(alignment) * forceStrengths.y;
 }
 
 fn cohesionForce(boid: Boid) -> vec4f {
   let position = boid.position;
   let numBoids = arrayLength(&boidsIn);
+  let visionDistance = visionDistance / 500.0;
 
-  var averagePosition = vec4f(0.0, 0.0, 0.0, 0.0);
+  var averagePosition = position;
   for (var i: u32 = 0; i < numBoids; i++) {
     let other = boidsIn[i];
 
@@ -94,12 +123,26 @@ fn cohesionForce(boid: Boid) -> vec4f {
       continue;
     }
 
-    averagePosition += other.position;
+    let difference = other.position - position;
+    let distance = length(difference);
+    if (distance < 0.0001 || visionDistance < distance) {
+      continue;
+    }
+
+    averagePosition += difference / distance;
   }
 
-  averagePosition /= f32(numBoids);
+  let force = averagePosition - position;
 
-  return (averagePosition - position) * forceStrengths.z * 0.00001;
+  if (isZero(force)) {
+    return vec4f();
+  }
+
+  return normalize(force) * forceStrengths.z;
+}
+
+fn isZero(v: vec4f) -> bool {
+  return v.x == 0.0 && v.y == 0.0 && v.z == 0.0 && v.w == 0.0;
 }
 
 fn reflect_off_wall(position: vec4f, velocity: vec4f) -> vec4f {

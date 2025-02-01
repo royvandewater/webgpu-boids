@@ -26,13 +26,24 @@ export const buildCompute = async ({ device, numBoids }) => {
   });
   device.queue.writeBuffer(forceStrengthsBuffer, 0, forceStrengths);
 
+  const visionDistance = new Float32Array([10]);
+  const visionDistanceBuffer = device.createBuffer({
+    label: "vision distance buffer",
+    size: visionDistance.byteLength,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+  });
+  device.queue.writeBuffer(visionDistanceBuffer, 0, visionDistance);
+
   /**
    * @param {{boidsIn: GPUBuffer, boidsOut: GPUBuffer, vertices: GPUBuffer}} options
    */
-  const compute = async ({ boidsIn, boidsOut, vertices, forceStrengths }) => {
+  const compute = async ({ boidsIn, boidsOut, vertices, forceStrengths, visionDistance }) => {
     // TODO: move this into a callback so we only update the force strengths when the user changes them
     const forceStrengthsArray = new Float32Array(forceStrengths);
     device.queue.writeBuffer(forceStrengthsBuffer, 0, forceStrengthsArray);
+
+    const visionDistanceArray = new Float32Array([visionDistance]);
+    device.queue.writeBuffer(visionDistanceBuffer, 0, visionDistanceArray);
 
     const bindGroup = device.createBindGroup({
       label: "bind group",
@@ -42,6 +53,7 @@ export const buildCompute = async ({ device, numBoids }) => {
         { binding: 1, resource: { buffer: boidsOut } },
         { binding: 2, resource: { buffer: vertices } },
         { binding: 3, resource: { buffer: forceStrengthsBuffer } },
+        { binding: 4, resource: { buffer: visionDistanceBuffer } },
       ],
     });
 

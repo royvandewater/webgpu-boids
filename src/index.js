@@ -11,12 +11,13 @@ async function main() {
 
   const searchParams = new URLSearchParams(window.location.search);
 
-  const numBoids = Number(searchParams.get("numBoids")) || 3;
+  const numBoids = Number(searchParams.get("numBoids")) || 3000;
   const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
-  const separationForceStrength = Number(searchParams.get("separation")) || 500;
-  const alignmentForceStrength = Number(searchParams.get("alignment")) || 500;
-  const cohesionForceStrength = Number(searchParams.get("cohesion")) || 500;
-  const speed = Number(searchParams.get("speed")) || 100;
+  const separationForceStrength = Number(searchParams.get("separation")) || 10;
+  const alignmentForceStrength = Number(searchParams.get("alignment")) || 50;
+  const cohesionForceStrength = Number(searchParams.get("cohesion")) || 5;
+  const speed = Number(searchParams.get("speed")) || 1000;
+  const visionDistance = Number(searchParams.get("vision")) || 200;
 
   assert(Number.isInteger(numBoids), "numBoids must be an integer");
   assert(Number.isInteger(seed), "seed must be an integer");
@@ -24,6 +25,7 @@ async function main() {
   assert(Number.isInteger(alignmentForceStrength), "alignment must be an integer");
   assert(Number.isInteger(cohesionForceStrength), "cohesion must be an integer");
   assert(Number.isInteger(speed), "speed must be an integer");
+  assert(Number.isInteger(visionDistance), "vision must be an integer");
 
   const adapter = await navigator.gpu.requestAdapter();
 
@@ -86,7 +88,7 @@ async function main() {
 
   const frame = async () => {
     const forceStrengths = [separationForceStrength, alignmentForceStrength, cohesionForceStrength, speed];
-    await compute({ boidsIn, boidsOut, vertices, forceStrengths });
+    await compute({ boidsIn, boidsOut, vertices, forceStrengths, visionDistance });
     await render({ boids: boidsOut, camera, vertices });
     [boidsIn, boidsOut] = [boidsOut, boidsIn];
 
