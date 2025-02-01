@@ -18,10 +18,25 @@ export const buildCompute = async ({ device, numBoids }) => {
     },
   });
 
+  const forceStrengths = new Float32Array([1, 1, 1]);
+  const forceStrengthsBuffer = device.createBuffer({
+    label: "force strengths buffer",
+    size: forceStrengths.byteLength,
+    usage:
+      GPUBufferUsage.STORAGE |
+      GPUBufferUsage.COPY_SRC |
+      GPUBufferUsage.COPY_DST,
+  });
+  device.queue.writeBuffer(forceStrengthsBuffer, 0, forceStrengths);
+
   /**
    * @param {{boidsIn: GPUBuffer, boidsOut: GPUBuffer, vertices: GPUBuffer}} options
    */
-  const compute = async ({ boidsIn, boidsOut, vertices }) => {
+  const compute = async ({ boidsIn, boidsOut, vertices, forceStrengths }) => {
+    // TODO: move this into a callback so we only update the force strengths when the user changes them
+    const forceStrengthsArray = new Float32Array(forceStrengths);
+    device.queue.writeBuffer(forceStrengthsBuffer, 0, forceStrengthsArray);
+
     const bindGroup = device.createBindGroup({
       label: "bind group",
       layout: pipeline.getBindGroupLayout(0),
@@ -29,6 +44,7 @@ export const buildCompute = async ({ device, numBoids }) => {
         { binding: 0, resource: { buffer: boidsIn } },
         { binding: 1, resource: { buffer: boidsOut } },
         { binding: 2, resource: { buffer: vertices } },
+        { binding: 3, resource: { buffer: forceStrengthsBuffer } },
       ],
     });
 

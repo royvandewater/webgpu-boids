@@ -7,15 +7,17 @@ import { registerPinchZoom } from "./registerPinchZoom.js";
 import { registerPan } from "./registerPan.js";
 
 async function main() {
-  assert(
-    globalThis.navigator,
-    "window.navigator is not defined, WebGPU is not supported"
-  );
+  assert(globalThis.navigator, "window.navigator is not defined, WebGPU is not supported");
 
   const searchParams = new URLSearchParams(window.location.search);
 
-  const numBoids = searchParams.get("numBoids") ?? 3;
-  const seed = searchParams.get("seed") ?? Math.floor(Math.random() * 1000000);
+  const numBoids = Number(searchParams.get("numBoids")) || 3;
+  const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
+  const separationForceStrength = Number(searchParams.get("separationForceStrength")) || 50000;
+
+  assert(Number.isInteger(numBoids), "numBoids must be an integer");
+  assert(Number.isInteger(seed), "seed must be an integer");
+  assert(Number.isInteger(separationForceStrength), "separationForceStrength must be an integer");
 
   const adapter = await navigator.gpu.requestAdapter();
 
@@ -24,8 +26,7 @@ async function main() {
   const bytesPerBoid = 3 * 4 * 4; // 48
   const minBufferSize = numBoids * bytesPerBoid;
   const maxBufferSize = adapter.limits.maxBufferSize;
-  const maxStorageBufferBindingSize =
-    adapter.limits.maxStorageBufferBindingSize;
+  const maxStorageBufferBindingSize = adapter.limits.maxStorageBufferBindingSize;
   assert(
     maxBufferSize >= minBufferSize,
     new Error(
@@ -78,7 +79,8 @@ async function main() {
   });
 
   const frame = async () => {
-    await compute({ boidsIn, boidsOut, vertices });
+    const forceStrengths = [separationForceStrength, 1, 1];
+    await compute({ boidsIn, boidsOut, vertices, forceStrengths });
     await render({ boids: boidsOut, camera, vertices });
     [boidsIn, boidsOut] = [boidsOut, boidsIn];
 

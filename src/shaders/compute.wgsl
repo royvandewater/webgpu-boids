@@ -3,6 +3,8 @@
 @group(0) @binding(0) var<storage, read_write> boidsIn: array<Boid>;
 @group(0) @binding(1) var<storage, read_write> boidsOut: array<Boid>;
 @group(0) @binding(2) var<storage, read_write> vertices: array<vec4f>;
+// x: separation force strength, y: alignment force strength, z: cohesion force strength
+@group(0) @binding(3) var<storage, read_write> forceStrengths: vec3f;
 
 // compute the new position and velocity of each boid. Also convert each boid's position & velocity to vertices
 @compute @workgroup_size(1) fn compute(
@@ -31,28 +33,28 @@ fn nextBoid(boid: Boid) -> Boid {
   let position = boid.position + boid.velocity;
   var velocity = boid.velocity;
 
-  let separationForce = calculateSeparationForce(boid.position);
+  let separationForce = calculateSeparationForce(boid);
   velocity += separationForce;
 
   return Boid(boid.id, position, reflect_off_wall(position, velocity));
 }
 
-fn calculateSeparationForce(position: vec4f) -> vec4f {
-  let separation = vec4f(0.0, 0.0, 0.0, 0.0);
-  // let numBoids = arrayLength(&boidsIn);
+fn calculateSeparationForce(boid: Boid) -> vec4f {
+  let position = boid.position;
+  let numBoids = arrayLength(&boidsIn);
 
-  // for (let i: u32 = 0; i < numBoids; i++) {
-  //   let other = boidsIn[i];
+  var separation = vec4f(0.0, 0.0, 0.0, 0.0);
+  for (var i: u32 = 0; i < numBoids; i++) {
+    let other = boidsIn[i];
 
-  //   if (other.id == boid.id) {
-  //     continue;
-  //   }
+    if (other.id == boid.id) {
+      continue;
+    }
 
-  //   let distance = length(position - other.position);
-  //   if (distance < 0.1) {
-  //     separation += normalize(position - other.position);
-  //   }
-  // }
+    let difference = position - other.position;
+    let distance = length(difference) * forceStrengths.x;
+    separation += normalize(difference) / distance;
+  }
 
   return separation;
 }
