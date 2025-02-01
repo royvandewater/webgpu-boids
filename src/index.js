@@ -19,8 +19,9 @@ async function main() {
 
   const adapter = await navigator.gpu.requestAdapter();
 
-  // Our biggest buffer will need to be numBoids * 3 vertices that are each 3 floats that are each 4 bytes
-  const bytesPerBoid = 3 * 3 * 4;
+  // Our biggest buffer will be the vertices buffer, which needs to be
+  // numBoids * 3 vertices that are each 4 floats that are each 4 bytes
+  const bytesPerBoid = 3 * 4 * 4; // 48
   const minBufferSize = numBoids * bytesPerBoid;
   const maxBufferSize = adapter.limits.maxBufferSize;
   const maxStorageBufferBindingSize =

@@ -16,6 +16,7 @@
   let vy = hashCell(i, seed + i * 3) * scale;
 
   boids[i] = Boid(
+    id.x,
     // the vertex shader requires the w value to be 1.0 for some reason
     vec4f(px, py, 0.0, 1.0), 
     // Only the x and y values are used for the velocity at the moment

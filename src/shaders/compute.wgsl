@@ -29,9 +29,32 @@
 
 fn nextBoid(boid: Boid) -> Boid {
   let position = boid.position + boid.velocity;
-  let velocity = boid.velocity;
+  var velocity = boid.velocity;
 
-  return Boid(position, reflect_off_wall(position, velocity));
+  let separationForce = calculateSeparationForce(boid.position);
+  velocity += separationForce;
+
+  return Boid(boid.id, position, reflect_off_wall(position, velocity));
+}
+
+fn calculateSeparationForce(position: vec4f) -> vec4f {
+  let separation = vec4f(0.0, 0.0, 0.0, 0.0);
+  // let numBoids = arrayLength(&boidsIn);
+
+  // for (let i: u32 = 0; i < numBoids; i++) {
+  //   let other = boidsIn[i];
+
+  //   if (other.id == boid.id) {
+  //     continue;
+  //   }
+
+  //   let distance = length(position - other.position);
+  //   if (distance < 0.1) {
+  //     separation += normalize(position - other.position);
+  //   }
+  // }
+
+  return separation;
 }
 
 fn reflect_off_wall(position: vec4f, velocity: vec4f) -> vec4f {
