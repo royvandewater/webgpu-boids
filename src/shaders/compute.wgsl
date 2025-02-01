@@ -55,11 +55,11 @@ fn separationForce(boid: Boid) -> vec4f {
     }
 
     let difference = position - other.position;
-    let distance = length(difference) * forceStrengths.x;
+    let distance = length(difference) * 50000;
     separation += normalize(difference) / distance;
   }
 
-  return separation;
+  return separation * forceStrengths.x * 0.01;
 }
 
 fn alignmentForce(boid: Boid) -> vec4f {

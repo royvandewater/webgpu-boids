@@ -13,7 +13,7 @@ async function main() {
 
   const numBoids = Number(searchParams.get("numBoids")) || 3;
   const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
-  const separationForceStrength = Number(searchParams.get("separation")) || 50000;
+  const separationForceStrength = Number(searchParams.get("separation")) || 500;
   const alignmentForceStrength = Number(searchParams.get("alignment")) || 500;
   const speedLimit = Number(searchParams.get("speedLimit")) || 10;
 
