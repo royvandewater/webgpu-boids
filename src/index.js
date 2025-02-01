@@ -5,7 +5,6 @@ import { generate } from "./generate.js";
 import { FpsTracker } from "./fpsTracker.js";
 import { registerPinchZoom } from "./registerPinchZoom.js";
 import { registerPan } from "./registerPan.js";
-import { readBoidsBuffer, readVec4fBuffer } from "./readGpuBuffer.js";
 
 async function main() {
   assert(
@@ -66,6 +65,7 @@ async function main() {
     position: { x: 0, y: 0 },
     zoom: 1,
   };
+
   registerPinchZoom(document.querySelector("canvas#boids"), (amount) => {
     camera.zoom *= 1 + amount / 100;
   });

@@ -29,16 +29,27 @@
 
 fn nextBoid(boid: Boid) -> Boid {
   let position = boid.position + boid.velocity;
+  let velocity = boid.velocity;
 
-  var velocity = boid.velocity;
-  if (position.x < -1.0 || 1.0 < position.x) {
-    velocity.x = -velocity.x;
+  return Boid(position, reflect_off_wall(position, velocity));
+}
+
+fn reflect_off_wall(position: vec4f, velocity: vec4f) -> vec4f {
+  var nextVelocity = velocity;
+  if (position.x < -1.0 && velocity.x < 0.0) {
+    nextVelocity.x = -velocity.x;
   }
-  if (position.y < -1.0 || 1.0 < position.y) {
-    velocity.y = -velocity.y;
+  if (1.0 < position.x && 0.0 < velocity.x) {
+    nextVelocity.x = -velocity.x;
+  }
+  if (position.y < -1.0 && velocity.y < 0.0) {
+    nextVelocity.y = -velocity.y;
+  }
+  if (1.0 < position.y && 0.0 < velocity.y) {
+    nextVelocity.y = -velocity.y;
   }
 
-  return Boid(position, velocity);
+  return nextVelocity;
 }
 
 fn rotate(vertex: vec2f, vRotation: vec2f) -> vec4f {
