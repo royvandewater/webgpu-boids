@@ -11,7 +11,7 @@ async function main() {
 
   const searchParams = new URLSearchParams(window.location.search);
 
-  const numBoids = Number(searchParams.get("numBoids")) || 3000;
+  const numBoids = Number(searchParams.get("numBoids")) || 1000;
   const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
   const separationForceStrength = Number(searchParams.get("separation")) || 10;
   const alignmentForceStrength = Number(searchParams.get("alignment")) || 50;
