@@ -3,8 +3,8 @@
 @group(0) @binding(0) var<storage, read_write> boidsIn: array<Boid>;
 @group(0) @binding(1) var<storage, read_write> boidsOut: array<Boid>;
 @group(0) @binding(2) var<storage, read_write> vertices: array<vec4f>;
-// x: separation force strength, y: alignment force strength, z: cohesion force strength
-@group(0) @binding(3) var<storage, read_write> forceStrengths: vec3f;
+// x: separation force strength, y: alignment force strength, z: cohesion force strength, w: speed limit
+@group(0) @binding(3) var<storage, read_write> forceStrengths: vec4f;
 
 // compute the new position and velocity of each boid. Also convert each boid's position & velocity to vertices
 @compute @workgroup_size(1) fn compute(
@@ -33,13 +33,16 @@ fn nextBoid(boid: Boid) -> Boid {
   let position = boid.position + boid.velocity;
   var velocity = boid.velocity;
 
-  let separationForce = calculateSeparationForce(boid);
-  velocity += separationForce;
+  velocity += separationForce(boid);
+  velocity += alignmentForce(boid);
+  // velocity += cohesionForce(boid);
+  velocity = reflect_off_wall(position, velocity);
+  velocity = normalize(velocity) * 0.001 * forceStrengths.w; // enforce the speed limit
 
-  return Boid(boid.id, position, reflect_off_wall(position, velocity));
+  return Boid(boid.id, position, velocity);
 }
 
-fn calculateSeparationForce(boid: Boid) -> vec4f {
+fn separationForce(boid: Boid) -> vec4f {
   let position = boid.position;
   let numBoids = arrayLength(&boidsIn);
 
@@ -57,6 +60,25 @@ fn calculateSeparationForce(boid: Boid) -> vec4f {
   }
 
   return separation;
+}
+
+fn alignmentForce(boid: Boid) -> vec4f {
+  let position = boid.position;
+  let numBoids = arrayLength(&boidsIn);
+
+  var alignment = vec4f(0.0, 0.0, 0.0, 0.0);
+  for (var i: u32 = 0; i < numBoids; i++) {
+    let other = boidsIn[i];
+
+    if (other.id == boid.id) {
+      continue;
+    }
+
+    let distance = length(position - other.position) * 500;
+    alignment += (other.velocity / distance);
+  }
+
+  return alignment * forceStrengths.y * 0.01;
 }
 
 fn reflect_off_wall(position: vec4f, velocity: vec4f) -> vec4f {

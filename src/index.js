@@ -13,11 +13,15 @@ async function main() {
 
   const numBoids = Number(searchParams.get("numBoids")) || 3;
   const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
-  const separationForceStrength = Number(searchParams.get("separationForceStrength")) || 50000;
+  const separationForceStrength = Number(searchParams.get("separation")) || 50000;
+  const alignmentForceStrength = Number(searchParams.get("alignment")) || 500;
+  const speedLimit = Number(searchParams.get("speedLimit")) || 10;
 
   assert(Number.isInteger(numBoids), "numBoids must be an integer");
   assert(Number.isInteger(seed), "seed must be an integer");
-  assert(Number.isInteger(separationForceStrength), "separationForceStrength must be an integer");
+  assert(Number.isInteger(separationForceStrength), "separation must be an integer");
+  assert(Number.isInteger(alignmentForceStrength), "alignment must be an integer");
+  assert(Number.isInteger(speedLimit), "speedLimit must be an integer");
 
   const adapter = await navigator.gpu.requestAdapter();
 
@@ -79,7 +83,7 @@ async function main() {
   });
 
   const frame = async () => {
-    const forceStrengths = [separationForceStrength, 1, 1];
+    const forceStrengths = [separationForceStrength, alignmentForceStrength, 1, speedLimit];
     await compute({ boidsIn, boidsOut, vertices, forceStrengths });
     await render({ boids: boidsOut, camera, vertices });
     [boidsIn, boidsOut] = [boidsOut, boidsIn];

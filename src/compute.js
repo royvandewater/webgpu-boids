@@ -18,14 +18,11 @@ export const buildCompute = async ({ device, numBoids }) => {
     },
   });
 
-  const forceStrengths = new Float32Array([1, 1, 1]);
+  const forceStrengths = new Float32Array([1, 1, 1, 1]);
   const forceStrengthsBuffer = device.createBuffer({
     label: "force strengths buffer",
     size: forceStrengths.byteLength,
-    usage:
-      GPUBufferUsage.STORAGE |
-      GPUBufferUsage.COPY_SRC |
-      GPUBufferUsage.COPY_DST,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
   });
   device.queue.writeBuffer(forceStrengthsBuffer, 0, forceStrengths);
 
