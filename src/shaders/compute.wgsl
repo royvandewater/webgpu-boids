@@ -18,10 +18,11 @@
   let position = boid.position;
   let velocity = boid.velocity;
 
+  let scale = 0.01;
   let triangle: array<vec2f, 3> = array<vec2f, 3>(
-    vec2f(0.1, 0.0),
-    vec2f(-0.1, 0.1),
-    vec2f(-0.1, -0.1),
+    vec2f(scale, 0.0),
+    vec2f(-scale, scale),
+    vec2f(-scale, -scale),
   );
 
   vertices[vi + 0] = position + rotate(triangle[0], velocity.xy);
@@ -59,7 +60,7 @@ fn separationForce(boid: Boid) -> vec4f {
     separation += normalize(difference) / distance;
   }
 
-  return separation * forceStrengths.x * 0.01;
+  return separation * forceStrengths.x * 0.001;
 }
 
 fn alignmentForce(boid: Boid) -> vec4f {
@@ -98,7 +99,7 @@ fn cohesionForce(boid: Boid) -> vec4f {
 
   averagePosition /= f32(numBoids);
 
-  return (averagePosition - position) * forceStrengths.z * 0.000001;
+  return (averagePosition - position) * forceStrengths.z * 0.00001;
 }
 
 fn reflect_off_wall(position: vec4f, velocity: vec4f) -> vec4f {

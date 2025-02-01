@@ -21,3 +21,7 @@ canvas#grid {
   font-size: 20px;
   font-family: monospace;
 }
+
+.hidden {
+  display: none;
+}
