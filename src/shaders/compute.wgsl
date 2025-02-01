@@ -3,7 +3,7 @@
 @group(0) @binding(0) var<storage, read_write> boidsIn: array<Boid>;
 @group(0) @binding(1) var<storage, read_write> boidsOut: array<Boid>;
 @group(0) @binding(2) var<storage, read_write> vertices: array<vec4f>;
-// x: separation force strength, y: alignment force strength, z: cohesion force strength, w: speed limit
+// x: separation force strength, y: alignment force strength, z: cohesion force strength, w: speed
 @group(0) @binding(3) var<storage, read_write> forceStrengths: vec4f;
 
 // compute the new position and velocity of each boid. Also convert each boid's position & velocity to vertices
@@ -35,9 +35,9 @@ fn nextBoid(boid: Boid) -> Boid {
 
   velocity += separationForce(boid);
   velocity += alignmentForce(boid);
-  // velocity += cohesionForce(boid);
+  velocity += cohesionForce(boid);
   velocity = reflect_off_wall(position, velocity);
-  velocity = normalize(velocity) * 0.001 * forceStrengths.w; // enforce the speed limit
+  velocity = normalize(velocity) * 0.0001 * forceStrengths.w; // enforce the speed;
 
   return Boid(boid.id, position, velocity);
 }
@@ -79,6 +79,26 @@ fn alignmentForce(boid: Boid) -> vec4f {
   }
 
   return alignment * forceStrengths.y * 0.01;
+}
+
+fn cohesionForce(boid: Boid) -> vec4f {
+  let position = boid.position;
+  let numBoids = arrayLength(&boidsIn);
+
+  var averagePosition = vec4f(0.0, 0.0, 0.0, 0.0);
+  for (var i: u32 = 0; i < numBoids; i++) {
+    let other = boidsIn[i];
+
+    if (other.id == boid.id) {
+      continue;
+    }
+
+    averagePosition += other.position;
+  }
+
+  averagePosition /= f32(numBoids);
+
+  return (averagePosition - position) * forceStrengths.z * 0.000001;
 }
 
 fn reflect_off_wall(position: vec4f, velocity: vec4f) -> vec4f {
