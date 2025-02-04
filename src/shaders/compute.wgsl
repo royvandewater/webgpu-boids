@@ -71,7 +71,7 @@ fn separationForce(boid: Boid) -> vec4f {
       continue;
     }
 
-    separation += normalize(difference) / distance;
+    separation += normalize(difference) / (distance * distance);
   }
 
   if (isZero(separation)) {
@@ -100,7 +100,7 @@ fn alignmentForce(boid: Boid) -> vec4f {
       continue;
     }
 
-    alignment += normalize(other.velocity) / distance;
+    alignment += normalize(other.velocity) / (distance * distance);
   }
 
   if (isZero(alignment)) {
@@ -129,7 +129,7 @@ fn cohesionForce(boid: Boid) -> vec4f {
       continue;
     }
 
-    averagePosition += difference / distance;
+    averagePosition += difference / (distance * distance);
   }
 
   let force = averagePosition - position;
