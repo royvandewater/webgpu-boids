@@ -14,8 +14,8 @@ async function main() {
   const numBoids = Number(searchParams.get("numBoids")) || 1000;
   const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
   const separationForceStrength = Number(searchParams.get("separation")) || 10;
-  const alignmentForceStrength = Number(searchParams.get("alignment")) || 50;
-  const cohesionForceStrength = Number(searchParams.get("cohesion")) || 5;
+  const alignmentForceStrength = Number(searchParams.get("alignment")) || 10;
+  const cohesionForceStrength = Number(searchParams.get("cohesion")) || 10;
   const speed = Number(searchParams.get("speed")) || 1000;
   const visionDistance = Number(searchParams.get("vision")) || 200;
 
@@ -93,7 +93,7 @@ async function main() {
     [boidsIn, boidsOut] = [boidsOut, boidsIn];
 
     fpsTracker.update();
-    document.getElementById("fps").textContent = `${fpsTracker.fps} fps`;
+    document.getElementById("fps").textContent = `${Math.round(fpsTracker.fps)} fps`;
     requestAnimationFrame(frame);
   };
   frame();

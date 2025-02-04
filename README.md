@@ -9,8 +9,8 @@ WebGPU implementation of Boids algorithm
 - [x] Apply velocity to boids on every frame
 - [x] Have walls at -1, 1 that reflect boids
 - [x] Apply separation
-- [ ] Apply alignment
-- [ ] Apply cohesion
+- [x] Apply alignment
+- [x] Apply cohesion
 - [ ] Support arbitrary boid meshes
 - [ ] Render walls?
 - [ ] Add the 3rd dimension

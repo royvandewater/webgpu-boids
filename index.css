@@ -17,7 +17,7 @@ canvas#grid {
   position: fixed;
   bottom: 2%;
   right: 2%;
-  color: red;
+  color: #333;
   font-size: 20px;
   font-family: monospace;
 }
