@@ -13,11 +13,11 @@ async function main() {
 
   const numBoids = Number(searchParams.get("numBoids")) || 1000;
   const seed = Number(searchParams.get("seed")) || Math.floor(Math.random() * 1000000);
-  const separationForceStrength = Number(searchParams.get("separation")) || 10;
-  const alignmentForceStrength = Number(searchParams.get("alignment")) || 10;
-  const cohesionForceStrength = Number(searchParams.get("cohesion")) || 10;
-  const speed = Number(searchParams.get("speed")) || 1000;
-  const visionDistance = Number(searchParams.get("vision")) || 200;
+  const separationForceStrength = Number(searchParams.get("separation")) || 20;
+  const alignmentForceStrength = Number(searchParams.get("alignment")) || 20;
+  const cohesionForceStrength = Number(searchParams.get("cohesion")) || 20;
+  const speed = Number(searchParams.get("speed")) || 100;
+  const visionDistance = Number(searchParams.get("vision")) || 10;
 
   assert(Number.isInteger(numBoids), "numBoids must be an integer");
   assert(Number.isInteger(seed), "seed must be an integer");
